@@ -1,0 +1,30 @@
+---
+
+- name: Create droplets
+  hosts: local
+  connection: local
+  gather_facts: no
+  vars:
+    do_api: "{{ lookup('env', 'DO_API') }}"
+
+  vars_files:
+    - vars/droplets
+  tasks:
+
+    - name: create droplets
+      digital_ocean:
+        state: present
+        command: droplet
+        backups_enabled: "{{ item.backups_enabled | default(False) }}"
+        size_id: "{{ item.size_id }}"
+        region_id: "{{ item.region_id }}"
+        name: "{{ item.name }}"
+        image_id: "{{ item.image_id | default('ubuntu-14-04-x64') }}"
+        private_networking: "{{ item.private_networking | default(True) }}"
+        user_data: "{{ lookup('template', 'user_data.j2') | trim }}"
+        api_token: "{{ do_api }}"
+      with_items: droplets
+      register: boxes
+
+    - debug: msg="{{ item.droplet.name }} {{ item.droplet.ip_address }}"
+      with_items: boxes.results

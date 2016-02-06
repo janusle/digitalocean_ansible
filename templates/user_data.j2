@@ -1,0 +1,15 @@
+#!/bin/bash
+adduser {{ user }} --disabled-password --gecos ""
+adduser {{ user }} sudo
+if [[ ! -d /home/{{ user }}/.ssh ]];then
+  mkdir /home/{{ user }}/.ssh
+fi
+
+echo '{{ user }} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/{{ user }}
+# Import public keys from your github account
+apt-get -y install curl
+curl https://github.com/janusle.keys>> /home/{{ user }}/.ssh/authorized_keys
+
+# Disable root login
+sed -i 's/^PermitRootLogin[:space:]*.*/PermitRootLogin no/g' /etc/ssh/sshd_config
+service ssh restart

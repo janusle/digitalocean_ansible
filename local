@@ -1,0 +1,2 @@
+[local]
+localhost ansible_python_interpreter=python # force to use the python from virtualenv
